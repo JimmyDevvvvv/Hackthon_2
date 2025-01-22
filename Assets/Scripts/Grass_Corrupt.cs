@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 public class GrassInfection : MonoBehaviour
@@ -7,13 +6,12 @@ public class GrassInfection : MonoBehaviour
     public Material startMaterial; // Healthy material
     public Material infectedMaterial; // Infected material
 
-    [Header("Transition Settings")]
-    public float transitionDuration = 2f; // Time it takes to transition
-    public float spreadDelay = 0.5f; // Delay before spreading infection to nearby objects
-    public float spreadRadius = 5f; // Radius to infect nearby objects
+    [Header("Settings")]
+    public float timeToInfect = 5f; // Time (in seconds) before fully infected
 
     private Renderer objectRenderer;
     private Material currentMaterial; // Instance for smooth blending
+    private float timer = 0f;
     private bool isInfected = false;
 
     void Start()
@@ -22,6 +20,7 @@ public class GrassInfection : MonoBehaviour
         objectRenderer = GetComponent<Renderer>();
         if (startMaterial != null)
         {
+            // Create a new material instance for blending
             currentMaterial = new Material(startMaterial);
             objectRenderer.material = currentMaterial;
         }
@@ -31,69 +30,31 @@ public class GrassInfection : MonoBehaviour
         }
     }
 
-    public void Infect()
+    void Update()
     {
         if (!isInfected)
         {
-            Debug.Log($"{gameObject.name} is now infected!");
-            isInfected = true;
+            // Increment the timer
+            timer += Time.deltaTime;
 
-            // Start the smooth transition
-            StartCoroutine(TransitionToInfected());
-
-            // Start spreading the infection
-            StartCoroutine(SpreadInfection());
-        }
-        else
-        {
-            Debug.Log($"{gameObject.name} is already infected!");
-        }
-    }
-
-    private IEnumerator TransitionToInfected()
-    {
-        Debug.Log($"{gameObject.name} transitioning to infected...");
-        float elapsedTime = 0f;
-
-        while (elapsedTime < transitionDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float lerpFactor = Mathf.Clamp01(elapsedTime / transitionDuration);
-
-            // Smoothly blend the material properties
+            // Smoothly blend materials over time
+            float lerpFactor = Mathf.Clamp01(timer / timeToInfect);
             currentMaterial.Lerp(startMaterial, infectedMaterial, lerpFactor);
 
-            Debug.Log($"Lerp Progress on {gameObject.name}: {lerpFactor}");
-            yield return null; // Wait for the next frame
-        }
-
-        // Ensure the infected material is fully applied at the end
-        Debug.Log($"{gameObject.name} fully infected!");
-        currentMaterial.CopyPropertiesFromMaterial(infectedMaterial);
-    }
-
-    private IEnumerator SpreadInfection()
-    {
-        yield return new WaitForSeconds(spreadDelay); // Delay before spreading
-
-        Collider[] nearbyObjects = Physics.OverlapSphere(transform.position, spreadRadius);
-        Debug.Log($"Nearby Objects Found: {nearbyObjects.Length} around {gameObject.name}");
-
-        foreach (Collider col in nearbyObjects)
-        {
-            GrassInfection nearbyGrass = col.GetComponent<GrassInfection>();
-            if (nearbyGrass != null && !nearbyGrass.isInfected)
+            // Check if fully infected
+            if (lerpFactor >= 1f)
             {
-                Debug.Log($"Infecting {col.gameObject.name} from {gameObject.name}");
-                nearbyGrass.Infect();
+                CompleteInfection();
             }
         }
     }
 
-    private void OnDrawGizmosSelected()
+    private void CompleteInfection()
     {
-        // Visualize the spread radius in the Scene view
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, spreadRadius);
+        isInfected = true;
+
+        // Ensure the material is fully set to the infected state
+        currentMaterial.CopyPropertiesFromMaterial(infectedMaterial);
+        Debug.Log($"{gameObject.name} is now fully infected!");
     }
 }
