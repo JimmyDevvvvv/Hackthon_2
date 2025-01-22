@@ -35,3 +35,4 @@ public class InfectedManager : MonoBehaviour
         infectedCountText.text = $"Infected Grass: {infectedGrass.Count}";
     }
 }
+

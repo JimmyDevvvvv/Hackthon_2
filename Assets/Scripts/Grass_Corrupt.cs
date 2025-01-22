@@ -9,6 +9,10 @@ public class GrassPatch : MonoBehaviour
     private InfectedManager grassManager;
     public float infectionDelay = 5f; // Time before the grass gets infected
 
+    [Header("Health Settings")]
+    public int maxHealth = 3; // Maximum health
+    private int currentHealth; // Current health of the grass
+
     void Start()
     {
         grassRenderer = GetComponent<Renderer>();
@@ -17,6 +21,9 @@ public class GrassPatch : MonoBehaviour
 
         // Start infection process
         Invoke(nameof(StartInfection), infectionDelay);
+
+        // Initialize health
+        currentHealth = maxHealth;
     }
 
     public void StartInfection()
@@ -26,6 +33,7 @@ public class GrassPatch : MonoBehaviour
             isInfected = true; // Mark as infected
             grassRenderer.material = infectedMaterial; // Change material to infected
             grassManager.AddInfectedGrass(this); // Notify the manager
+            currentHealth = maxHealth; // Reset health for healing
         }
     }
 
@@ -33,17 +41,25 @@ public class GrassPatch : MonoBehaviour
     {
         if (isInfected)
         {
-            isInfected = false; // Mark as healthy
-            grassRenderer.material = healthyMaterial; // Change material to healthy
-            grassManager.RemoveInfectedGrass(this); // Notify the manager
+            currentHealth--; // Decrease health with each healing interaction
+
+            if (currentHealth <= 0)
+            {
+                // Fully healed
+                isInfected = false; // Mark as healthy
+                grassRenderer.material = healthyMaterial; // Change material to healthy
+                grassManager.RemoveInfectedGrass(this); // Notify the manager
+            }
         }
     }
 
-    void OnMouseDown()
+    private void OnTriggerEnter(Collider other)
     {
-        if (isInfected)
+        // Check if the collider has the tag "Healer"
+        if (isInfected && other.CompareTag("Healer"))
         {
-            HealGrass(); // Heal the grass if infected
+            HealGrass(); // Heal the grass when the collider interacts
         }
     }
 }
+
