@@ -1,60 +1,70 @@
-using UnityEngine;
-
-public class GrassInfection : MonoBehaviour
+public class GrassPatch : MonoBehaviour
 {
     [Header("Materials")]
-    public Material startMaterial; // Healthy material
-    public Material infectedMaterial; // Infected material
+    public Material healthyMaterial; // Green grass
+    public Material infectedMaterial; // Red grass
 
-    [Header("Settings")]
-    public float timeToInfect = 5f; // Time (in seconds) before fully infected
+    [Header("Infection Settings")]
+    public float infectionTime = 5f; // Time for the grass to fully turn red
+    public bool isInfected = false; // Tracks infection state
 
-    private Renderer objectRenderer;
-    private Material currentMaterial; // Instance for smooth blending
-    private float timer = 0f;
-    private bool isInfected = false;
+    private Renderer grassRenderer;
+    private float infectionProgress = 0f; // Progress of infection
 
     void Start()
     {
-        // Get the Renderer and assign the starting material
-        objectRenderer = GetComponent<Renderer>();
-        if (startMaterial != null)
+        // Get the Renderer component and set the initial material
+        grassRenderer = GetComponent<Renderer>();
+        if (healthyMaterial != null)
         {
-            // Create a new material instance for blending
-            currentMaterial = new Material(startMaterial);
-            objectRenderer.material = currentMaterial;
-        }
-        else
-        {
-            Debug.LogError($"Start Material is missing on {gameObject.name}");
+            grassRenderer.material = healthyMaterial;
         }
     }
 
     void Update()
     {
-        if (!isInfected)
+        // Handle the infection process
+        if (isInfected)
         {
-            // Increment the timer
-            timer += Time.deltaTime;
+            infectionProgress += Time.deltaTime / infectionTime;
+            grassRenderer.material.Lerp(healthyMaterial, infectedMaterial, infectionProgress);
 
-            // Smoothly blend materials over time
-            float lerpFactor = Mathf.Clamp01(timer / timeToInfect);
-            currentMaterial.Lerp(startMaterial, infectedMaterial, lerpFactor);
-
-            // Check if fully infected
-            if (lerpFactor >= 1f)
+            if (infectionProgress >= 1f)
             {
-                CompleteInfection();
+                infectionProgress = 1f; // Clamp progress
             }
         }
     }
 
-    private void CompleteInfection()
+    public void StartInfection()
     {
-        isInfected = true;
+        // Trigger infection process
+        if (!isInfected)
+        {
+            isInfected = true;
+            infectionProgress = 0f; // Reset progress
+            InfectedManager.Instance.IncreaseInfectedCount();
+        }
+    }
 
-        // Ensure the material is fully set to the infected state
-        currentMaterial.CopyPropertiesFromMaterial(infectedMaterial);
-        Debug.Log($"{gameObject.name} is now fully infected!");
+    public void HealGrass()
+    {
+        // Heal the grass and reset the infection
+        if (isInfected)
+        {
+            isInfected = false;
+            infectionProgress = 0f; // Reset progress
+            grassRenderer.material = healthyMaterial;
+            InfectedManager.Instance.DecreaseInfectedCount();
+        }
+    }
+
+    void OnMouseDown()
+    {
+        // Heal the grass when clicked
+        if (isInfected)
+        {
+            HealGrass();
+        }
     }
 }
