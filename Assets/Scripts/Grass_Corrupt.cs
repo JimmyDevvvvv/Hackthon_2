@@ -1,70 +1,49 @@
+using UnityEngine;
+
 public class GrassPatch : MonoBehaviour
 {
-    [Header("Materials")]
     public Material healthyMaterial; // Green grass
     public Material infectedMaterial; // Red grass
-
-    [Header("Infection Settings")]
-    public float infectionTime = 5f; // Time for the grass to fully turn red
-    public bool isInfected = false; // Tracks infection state
-
     private Renderer grassRenderer;
-    private float infectionProgress = 0f; // Progress of infection
+    private bool isInfected = false; // Tracks infection state
+    private InfectedManager grassManager;
+    public float infectionDelay = 5f; // Time before the grass gets infected
 
     void Start()
     {
-        // Get the Renderer component and set the initial material
         grassRenderer = GetComponent<Renderer>();
-        if (healthyMaterial != null)
-        {
-            grassRenderer.material = healthyMaterial;
-        }
-    }
+        grassRenderer.material = healthyMaterial; // Set the initial material to healthy
+        grassManager = FindObjectOfType<InfectedManager>();
 
-    void Update()
-    {
-        // Handle the infection process
-        if (isInfected)
-        {
-            infectionProgress += Time.deltaTime / infectionTime;
-            grassRenderer.material.Lerp(healthyMaterial, infectedMaterial, infectionProgress);
-
-            if (infectionProgress >= 1f)
-            {
-                infectionProgress = 1f; // Clamp progress
-            }
-        }
+        // Start infection process
+        Invoke(nameof(StartInfection), infectionDelay);
     }
 
     public void StartInfection()
     {
-        // Trigger infection process
         if (!isInfected)
         {
-            isInfected = true;
-            infectionProgress = 0f; // Reset progress
-            InfectedManager.Instance.IncreaseInfectedCount();
+            isInfected = true; // Mark as infected
+            grassRenderer.material = infectedMaterial; // Change material to infected
+            grassManager.AddInfectedGrass(this); // Notify the manager
         }
     }
 
     public void HealGrass()
     {
-        // Heal the grass and reset the infection
         if (isInfected)
         {
-            isInfected = false;
-            infectionProgress = 0f; // Reset progress
-            grassRenderer.material = healthyMaterial;
-            InfectedManager.Instance.DecreaseInfectedCount();
+            isInfected = false; // Mark as healthy
+            grassRenderer.material = healthyMaterial; // Change material to healthy
+            grassManager.RemoveInfectedGrass(this); // Notify the manager
         }
     }
 
     void OnMouseDown()
     {
-        // Heal the grass when clicked
         if (isInfected)
         {
-            HealGrass();
+            HealGrass(); // Heal the grass if infected
         }
     }
 }
