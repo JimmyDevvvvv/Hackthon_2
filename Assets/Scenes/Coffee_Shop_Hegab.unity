@@ -825,10 +825,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f12684581e9bf994dadef594d8a046e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectAnimator: {fileID: 509815241}
-  animationTriggerName: Play
-  objectToClose: {fileID: 1104198305}
-  objectToEnable: {fileID: 509815240}
+  sceneToLoad: Scenes/CoffeeShop_Https
 --- !u!135 &1078403612
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1409,10 +1406,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f12684581e9bf994dadef594d8a046e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectAnimator: {fileID: 509815241}
-  animationTriggerName: Play
-  objectToClose: {fileID: 1104198305}
-  objectToEnable: {fileID: 509815240}
+  sceneToLoad: Scenes/CoffeeShop_Http
 --- !u!135 &1346309068
 SphereCollider:
   m_ObjectHideFlags: 0
