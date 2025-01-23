@@ -18,6 +18,7 @@ EditorBuildSettings:
     path: Assets/Scenes/CoffeeShop_Https.unity
     guid: fef92375b48a69844bfcf5fa8dc3533d
   m_configObjects:
+    Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: 8d6098dc924b22b49b5c45c22c53469d, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: b2e9168ca23143247b40d8e0035ec72b, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 641de76bc9a7d2e48903c8c9044bb30e, type: 2}
